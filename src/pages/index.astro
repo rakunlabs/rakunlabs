@@ -1,0 +1,68 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+
+interface Repo {
+  name: string;
+  description: string | null;
+  html_url: string;
+  stargazers_count: number;
+  language: string | null;
+  forks_count: number;
+  fork: boolean;
+  archived: boolean;
+  topics: string[];
+}
+
+let repos: Repo[] = [];
+
+try {
+  const response = await fetch(
+    "https://api.github.com/orgs/rakunlabs/repos?per_page=100&sort=updated&direction=desc",
+    {
+      headers: {
+        Accept: "application/vnd.github.v3+json",
+        "User-Agent": "rakunlabs-website",
+      },
+    }
+  );
+
+  if (response.ok) {
+    const data: Repo[] = await response.json();
+    repos = data
+      .filter((repo) => !repo.fork && !repo.archived)
+      .sort((a, b) => b.stargazers_count - a.stargazers_count);
+  }
+} catch (error) {
+  console.error("Failed to fetch repos:", error);
+}
+---
+
+<Layout title="rakunlabs - Open Source Projects" description="Explore open source projects by rakunlabs. Building tools and libraries for the developer community.">
+  <div class="max-w-6xl mx-auto px-[5%]">
+    <section class="text-center py-8 pb-6">
+      <h1 class="inline-block text-2xl font-bold px-3 py-1 bg-accent text-white border-y border-black">Projects</h1>
+      <p class="text-muted text-sm max-w-xl mx-auto mt-3">Open source tools and libraries built by rakunlabs</p>
+    </section>
+
+    {repos.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-12">
+        {repos.map((repo) => (
+          <ProjectCard
+            name={repo.name}
+            description={repo.description}
+            url={repo.html_url}
+            stars={repo.stargazers_count}
+            language={repo.language}
+            forks={repo.forks_count}
+            topics={repo.topics || []}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="text-center text-muted py-16">
+        Unable to load repositories. Visit our <a href="https://github.com/rakunlabs" class="text-accent hover:text-accent-dark">GitHub</a> directly.
+      </p>
+    )}
+  </div>
+</Layout>

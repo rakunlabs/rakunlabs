@@ -1,0 +1,19 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="border-t border-black py-4 mt-auto">
+  <div class="max-w-6xl mx-auto px-[5%] flex items-center justify-between flex-wrap gap-3">
+    <div class="flex items-center gap-2 text-muted text-[13px]">
+      <span>&copy; {currentYear} rakunlabs</span>
+      <span>&middot;</span>
+      <span>Open Source Projects</span>
+    </div>
+
+    <nav class="flex gap-4">
+      <a href="/privacy-policy" class="text-muted text-[13px] transition-colors duration-150 hover:text-accent hover:no-underline">Privacy Policy</a>
+      <a href="/terms-of-service" class="text-muted text-[13px] transition-colors duration-150 hover:text-accent hover:no-underline">Terms of Service</a>
+      <a href="https://github.com/rakunlabs" target="_blank" rel="noopener noreferrer" class="text-muted text-[13px] transition-colors duration-150 hover:text-accent hover:no-underline">GitHub</a>
+    </nav>
+  </div>
+</footer>

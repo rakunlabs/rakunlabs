@@ -1,0 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #f3f4f6;
+  --color-card: #ffffff;
+  --color-hover: #fef9c3;
+  --color-accent: #ff5c00;
+  --color-accent-dark: #e65200;
+  --color-muted: #6b7280;
+  --color-secondary: #374151;
+  --color-selection-bg: #ef4444;
+
+  --font-mono: "Inconsolata", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --shadow-sharp: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  --shadow-sharp-sm: 3px 3px 0px 0px rgba(0, 0, 0, 1);
+}
+
+::selection {
+  background-color: var(--color-selection-bg);
+  color: #ffffff;
+}
+
+* {
+  border-color: currentColor;
+}
