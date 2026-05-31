@@ -5,6 +5,7 @@ const currentPath = Astro.url.pathname;
 
 const navLinks = [
   { href: "/", label: "projects", match: (p: string) => p === "/" },
+  { href: "/skills", label: "skills", match: (p: string) => p.startsWith("/skills") },
   { href: "/about", label: "about", match: (p: string) => p.startsWith("/about") },
 ];
 ---

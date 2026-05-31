@@ -12,7 +12,7 @@ into the directory your agent watches.
 
 | Skill | What it does |
 | --- | --- |
-| [`rakunlabs-go`](./rakunlabs-go/) | Build a Go service the rakunlabs way: project layout, `main.go` wiring, and quickstarts for `into`, `logi`, `chu`, `tell`, `ada`, `ok`, `cache`, `query`, `bw`, `alan`. |
+| [`rakunlabs-go`](./rakunlabs-go/) | Build a Go service the rakunlabs way: project layout, `main.go` wiring, and quickstarts for `into`, `logi`, `chu`, `tell`, `ada`, `ok`, `cache`, `query`, `muz`, `bw`, `alan`, `tummy`. |
 
 ## Install
 

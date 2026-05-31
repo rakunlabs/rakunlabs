@@ -2,11 +2,11 @@
 name: rakunlabs-go
 description: >-
   Use when building, scaffolding, or wiring a Go service/microservice with the
-  rakunlabs library stack — into, logi, chu, tell, ada, ok, cache, query, bw,
-  alan (github.com/rakunlabs/*). Covers the cmd/internal project layout, the
+  rakunlabs library stack — into, logi, chu, tell, ada, ok, cache, query, muz,
+  bw, alan, tummy (github.com/rakunlabs/*). Covers the cmd/internal project layout, the
   canonical main.go run(ctx) wiring, chu config, the ada middleware stack, and
   per-library quickstarts. Trigger on "rakunlabs service", "new Go service with
-  chu/ada/into", "into.Init", "chu.Load", "ada.New".
+  chu/ada/into", "into.Init", "chu.Load", "ada.New", "muz.Migrate", "SQLDriver", "tummy.Now".
 metadata:
   org: rakunlabs
   language: go
@@ -29,7 +29,7 @@ bottom) — do not invent APIs.
 - Wiring config loading, telemetry, an HTTP server, storage, or graceful
   shutdown into an existing rakunlabs service.
 - Using any of: `into`, `logi`, `chu`, `tell`, `ada`, `ok`, `cache`, `query`,
-  `bw`, `alan`.
+  `muz`, `bw`, `alan`, `tummy`.
 
 ## The library map
 
@@ -43,8 +43,10 @@ bottom) — do not invent APIs.
 | `ok`    | Retryable HTTP client | `ok.New(opts...)` |
 | `cache` | Generic cache over memory/redis | `cache.New[K,V](ctx, store, opts...)` |
 | `query` | URL query string → filter/sort/paging expression | `query.Parse(rawQuery, opts...)` |
+| `muz`   | SQL migration runner for PostgreSQL-style databases | `muz.Migrate{...}.Migrate(ctx, driver)` |
 | `bw`    | BadgerDB typed buckets + `query` engine (+ `bw/cluster`) | `bw.Open(path)` |
 | `alan`  | QUIC peer discovery, distributed locks, leader election | `alan.New(alan.Config{...})` |
+| `tummy` | Test helper for deterministic time-dependent code | `tummy.Enable()` / `tummy.Now()` |
 
 ## Standard project layout
 
@@ -353,6 +355,37 @@ _offset _sort _fields` are reserved. Adapters convert to SQL
 (`adaptergoqu.Select`) and `bw` consumes it directly. Validate field/value/
 limit with `query.NewValidator(...)` and `query.WithValidator`.
 
+### muz — SQL migrations
+Runs numbered SQL migration files from a filesystem or embedded `embed.FS`.
+Use `muz.SQLDriver` for SQL databases including PostgreSQL, MySQL, SQLite, and
+MSSQL. Set `Dialect` to match the target database and set `LockKey` when more
+than one process may run migrations concurrently.
+```go
+//go:embed migrations
+var migrationsFS embed.FS
+
+func migrate(ctx context.Context, db *sql.DB) error {
+	m := muz.Migrate{
+		Path:      "migrations",
+		FS:        migrationsFS,
+		Extension: ".sql",
+	}
+
+	driver := &muz.SQLDriver{
+		DB:      db,
+		Dialect: muz.DialectPostgres,
+		Table:   "migrations",
+		LockKey: "muz:postgres:public:migrations",
+		Logger:  slog.Default(),
+	}
+
+	return m.Migrate(ctx, driver)
+}
+```
+Migration files are sorted by numeric prefix (`1_schema.sql`,
+`2_indexes.sql`) and executed in order. Use `Order` to prioritize directories
+and `Skip` to exclude directories/files with glob patterns.
+
 ### bw — Badger typed buckets
 One struct tag set drives schema + wire name; no codegen.
 ```go
@@ -390,6 +423,28 @@ Also: `Send`/`Handle`, `SendAndWaitReply`, `Lock`/`TryLock`/`Unlock`,
 Raft — fine for idempotent/recoverable work, not for non-idempotent external
 effects.
 
+### tummy — time control in tests
+Use `tummy` when code depends on the current time and tests need deterministic
+time travel. Enable it in test setup, set the clock, then call `tummy.Now()` in
+code paths you want to control.
+```go
+func TestExpiresAt(t *testing.T) {
+	tummy.Enable()
+	t.Cleanup(tummy.Disable)
+
+	tummy.SetTime(time.Date(2026, 5, 31, 12, 0, 0, 0, time.UTC))
+
+	got := expiresAt(tummy.Now(), 2*time.Hour)
+	if !got.Equal(time.Date(2026, 5, 31, 14, 0, 0, 0, time.UTC)) {
+		t.Fatalf("expiresAt() = %s", got)
+	}
+
+	tummy.AddDuration(30 * time.Minute)
+	_ = tummy.Now()
+}
+```
+Also available: `tummy.AddDate(years, months, days)` for calendar jumps.
+
 ## Conventions & gotchas
 
 - **One env prefix per app** (`<APP>_`) via `loaderenv.WithPrefix`.
@@ -412,7 +467,9 @@ effects.
 - ok    — https://pkg.go.dev/github.com/rakunlabs/ok
 - cache — https://pkg.go.dev/github.com/rakunlabs/cache
 - query — https://pkg.go.dev/github.com/rakunlabs/query
+- muz   — https://pkg.go.dev/github.com/rakunlabs/muz
 - bw    — https://pkg.go.dev/github.com/rakunlabs/bw
 - alan  — https://pkg.go.dev/github.com/rakunlabs/alan
+- tummy — https://pkg.go.dev/github.com/rakunlabs/tummy
 
 Reference implementation: `github.com/rakunlabs/pika`.

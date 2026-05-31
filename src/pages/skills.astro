@@ -1,0 +1,184 @@
+---
+import Layout from "../layouts/Layout.astro";
+import CodeBlock from "../components/CodeBlock.astro";
+import skillsData from "../data/skills.json";
+
+interface Skill {
+  name: string;
+  tagline: string;
+  description: string;
+  covers: string[];
+  path: string;
+}
+
+const skills = skillsData as Skill[];
+const repo = "rakunlabs/rakunlabs";
+const repoUrl = "https://github.com/rakunlabs/rakunlabs";
+
+// Install targets per agent — all share the same SKILL.md format.
+const primary = skills[0];
+const installs = [
+  { id: "claude", label: "Claude Code", dir: "~/.claude/skills" },
+  { id: "opencode", label: "opencode", dir: "~/.config/opencode/skill" },
+  { id: "agents", label: "~/.agents", dir: "~/.agents/skills" },
+];
+
+const manual = `git clone ${repoUrl}
+cp -r rakunlabs/${primary.path} ~/.claude/skills/`;
+
+const usage = `scaffold a new rakunlabs Go service called "billing" with
+chu config, tell telemetry and an ada HTTP server`;
+---
+
+<Layout
+  title="skills - rakunlabs"
+  description="Drop-in agent skills that teach Claude Code, opencode and other coding agents how to build with the rakunlabs stack."
+>
+  {/* ---------------------------------------------------------------- HERO */}
+  <section class="px-6 sm:px-11 pt-[54px] pb-8">
+    <p class="text-[13px] text-faint mb-5 font-medium">
+      <span class="text-cream">~/rakunlabs/skills</span>
+      <span class="text-blue">$</span> cat SKILL.md
+    </p>
+
+    <h1 class="font-bold text-[clamp(2rem,6.5vw,46px)] leading-[1.08] tracking-[-0.02em] max-w-[760px] text-text">
+      Teach your agent<br />the <span class="text-pink">rakunlabs</span> way.
+    </h1>
+
+    <p class="text-muted text-[15px] max-w-[560px] mt-5 leading-relaxed">
+      A skill is a single <span class="text-text">SKILL.md</span> file — frontmatter plus
+      markdown — that coding agents like Claude Code and opencode load on demand. Drop the
+      folder into your agent's skills directory and it picks it up automatically.
+    </p>
+  </section>
+
+  {/* ------------------------------------------------------ AVAILABLE SKILLS */}
+  <section class="px-6 sm:px-11 pb-10">
+    <h2 class="text-[13px] text-faint uppercase tracking-wider mb-4">available skills</h2>
+    <div class="flex flex-col gap-4">
+      {
+        skills.map((s) => (
+          <div class="border border-line rounded-xl bg-surface p-5">
+            <div class="flex items-baseline justify-between gap-3 flex-wrap">
+              <h3 class="font-bold text-[16px]" style="color: var(--lang-go)">{s.name}</h3>
+              <a
+                href={`${repoUrl}/blob/main/${s.path}/SKILL.md`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-faint hover:text-text text-[12px] no-underline transition-colors duration-150"
+              >
+                view source &#8599;
+              </a>
+            </div>
+            <p class="text-text text-[14px] mt-1">{s.tagline}</p>
+            <p class="text-muted text-[14px] mt-2 leading-relaxed max-w-[620px]">{s.description}</p>
+            <div class="flex flex-wrap gap-1.5 mt-4">
+              <span class="text-faint text-[12px] mr-1">covers</span>
+              {s.covers.map((c) => (
+                <span class="stack-tag">{c}</span>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  {/* --------------------------------------------------------------- INSTALL */}
+  <section class="px-6 sm:px-11 pb-10">
+    <h2 class="text-[13px] text-faint uppercase tracking-wider mb-1">install</h2>
+    <p class="text-muted text-[14px] mb-4 max-w-[560px]">
+      One command — pick your agent. <span class="text-text">degit</span> copies just the
+      skill folder (no git history) into the directory your agent watches.
+    </p>
+
+    <div class="tabs" role="tablist" aria-label="Agent">
+      {
+        installs.map((a, i) => (
+          <button
+            type="button"
+            class:list={["tab", i === 0 && "is-active"]}
+            data-agent={a.id}
+            role="tab"
+            aria-selected={i === 0 ? "true" : "false"}
+          >
+            {a.label}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="mt-4">
+      {
+        installs.map((a, i) => (
+          <div data-agent-panel={a.id} hidden={i !== 0}>
+            <CodeBlock
+              label={`${a.label} — ${a.dir}/${primary.name}`}
+              code={`npx degit ${repo}/${primary.path} ${a.dir}/${primary.name}`}
+            />
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="text-muted text-[14px] mt-6 mb-3">Prefer git? Clone and copy the folder:</p>
+    <CodeBlock label="manual" code={manual} />
+
+    <p class="text-faint text-[13px] mt-4">
+      Restart your agent (or start a new session) so it scans the new skill.
+    </p>
+  </section>
+
+  {/* ----------------------------------------------------------------- USAGE */}
+  <section class="px-6 sm:px-11 pb-16">
+    <h2 class="text-[13px] text-faint uppercase tracking-wider mb-1">usage</h2>
+    <p class="text-muted text-[14px] mb-4 max-w-[560px]">
+      You don't invoke it manually — the agent loads the skill on its own when your request
+      matches its description. Just ask:
+    </p>
+    <CodeBlock label="prompt your agent" code={usage} />
+  </section>
+</Layout>
+
+<script is:inline>
+  (function () {
+    // Agent install tabs
+    const tabs = Array.from(document.querySelectorAll("[data-agent]"));
+    const panels = Array.from(document.querySelectorAll("[data-agent-panel]"));
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", function () {
+        const id = tab.getAttribute("data-agent");
+        tabs.forEach((t) => {
+          const on = t === tab;
+          t.classList.toggle("is-active", on);
+          t.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        panels.forEach((p) => {
+          p.hidden = p.getAttribute("data-agent-panel") !== id;
+        });
+      });
+    });
+
+    // Copy buttons
+    document.querySelectorAll(".copy-btn").forEach(function (btn) {
+      btn.addEventListener("click", async function () {
+        const block = btn.closest(".code-block");
+        const pre = block && block.querySelector(".code-pre");
+        if (!pre) return;
+        try {
+          await navigator.clipboard.writeText(pre.textContent || "");
+        } catch (e) {
+          return;
+        }
+        const label = btn.querySelector(".copy-label");
+        btn.classList.add("copied");
+        const prev = label ? label.textContent : "";
+        if (label) label.textContent = "copied";
+        setTimeout(function () {
+          btn.classList.remove("copied");
+          if (label) label.textContent = prev;
+        }, 1200);
+      });
+    });
+  })();
+</script>

@@ -7,8 +7,12 @@ interface Project {
   description: string;
   language: string;
   category: string;
+  type: "application" | "library";
+  stack?: string[]; // technologies used (shown as tags, searchable)
   license?: string; // optional manual override; otherwise detected from GitHub
 }
+
+const DEFAULT_TAB = "application";
 
 // Curated directory. Add new repos in src/data/projects.json — stars and the
 // license are detected from GitHub at build time.
@@ -51,6 +55,14 @@ const total = projects.length;
 const languages = [...new Set(projects.map((p) => p.language))]; // first-appearance order
 const langCount = languages.length;
 
+// Split into applications vs libraries. Applications are shown by default.
+const appCount = projects.filter((p) => p.type === "application").length;
+const libCount = projects.filter((p) => p.type === "library").length;
+const tabs = [
+  { id: "application", label: "application", count: appCount },
+  { id: "library", label: "library", count: libCount },
+] as const;
+
 // License summary derived from the actual repos rather than hard-coded.
 const licenseSet = [...new Set(projects.map((p) => info(p).license).filter(Boolean))].sort();
 let licenseValue = "";
@@ -64,10 +76,17 @@ if (licenseSet.length >= 1 && licenseSet.length <= 3) {
 }
 
 const repoBase = "https://github.com/rakunlabs";
+
+// Number rows within their own group so each tab reads 01..N.
+const counters: Record<string, number> = {};
+const rows = projects.map((p) => {
+  counters[p.type] = (counters[p.type] ?? 0) + 1;
+  return { p, n: counters[p.type] };
+});
 ---
 
 <Layout
-  title="rakunlabs — terminal index"
+  title="rakunlabs"
   description="Small, sharp open-source Go & Svelte tools from rakunlabs — config, services, data and AI primitives."
 >
   {/* ---------------------------------------------------------------- HERO */}
@@ -78,12 +97,11 @@ const repoBase = "https://github.com/rakunlabs";
     </p>
 
     <h1 class="font-bold text-[clamp(2rem,6.5vw,46px)] leading-[1.08] tracking-[-0.02em] max-w-[760px] text-text">
-      Small, sharp tools<br />for people who <span class="text-pink">develop</span>.
+      Tools, built with care<br />and kept in <span class="text-pink">good order</span>.
     </h1>
 
     <p class="text-muted text-[15px] max-w-[540px] mt-5 leading-relaxed">
-      Open-source Go &amp; Svelte libraries from rakunlabs — config, services,
-      data and AI primitives.
+      Open-source application and libraries from rakunlabs.
     </p>
 
     <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted mt-7">
@@ -114,7 +132,7 @@ const repoBase = "https://github.com/rakunlabs";
         placeholder="filter projects by name, tag, language or license…"
         class="flex-1 min-w-0 bg-transparent outline-none border-0 text-text placeholder:text-faint text-[14px]"
       />
-      <span id="counter" class="text-faint text-[13px] tabular-nums shrink-0">{total} / {total}</span>
+      <span id="counter" class="text-faint text-[13px] tabular-nums shrink-0">{appCount} / {appCount}</span>
     </div>
 
     <div class="flex flex-wrap gap-2 mt-3">
@@ -131,31 +149,61 @@ const repoBase = "https://github.com/rakunlabs";
 
   {/* ----------------------------------------------------- PROJECT LIST */}
   <section class="px-6 sm:px-11 pb-16">
-    <div class="border-t border-line">
+    <div class="tabs" role="tablist" aria-label="Project type">
       {
-        projects.map((p, i) => {
+        tabs.map((t) => (
+          <button
+            type="button"
+            class:list={["tab", t.id === DEFAULT_TAB && "is-active"]}
+            data-tab={t.id}
+            role="tab"
+            aria-selected={t.id === DEFAULT_TAB ? "true" : "false"}
+          >
+            {t.label}
+            <span class="tab-count">{t.count}</span>
+          </button>
+        ))
+      }
+    </div>
+
+    <div>
+      {
+        rows.map(({ p, n }) => {
           const slug = slugify(p.language);
           const { stars, license } = info(p);
+          const hidden = p.type !== DEFAULT_TAB ? ";display:none" : "";
+          const stack = p.stack ?? [];
           return (
             <a
               href={`${repoBase}/${p.name}`}
               target="_blank"
               rel="noopener noreferrer"
               class="project-row"
-              style={`--row-color: var(--lang-${slug}, var(--color-muted))`}
+              style={`--row-color: var(--lang-${slug}, var(--color-muted))${hidden}`}
               data-name={p.name}
               data-desc={p.description}
               data-category={p.category}
               data-lang={slug}
               data-license={license}
+              data-type={p.type}
+              data-stack={stack.join(" ")}
             >
               <span class="col-index text-faint text-[13px] tabular-nums">
-                {String(i + 1).padStart(2, "0")}
+                {String(n).padStart(2, "0")}
               </span>
               <span class="col-name font-bold text-[15px] truncate" style="color: var(--row-color)">
                 {p.name}
               </span>
-              <span class="col-desc text-muted text-[14px] truncate">{p.description}</span>
+              <div class="col-desc min-w-0">
+                <div class="text-muted text-[14px] truncate">{p.description}</div>
+                {stack.length > 0 && (
+                  <div class="flex flex-wrap gap-1.5 mt-1.5">
+                    {stack.map((t) => (
+                      <span class="stack-tag">{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
               <span class="col-cat justify-self-start text-faint text-[12px] border border-line rounded-[20px] px-2.5 py-[3px] leading-none">
                 {p.category}
               </span>
@@ -186,14 +234,18 @@ const repoBase = "https://github.com/rakunlabs";
     const empty = document.getElementById("empty");
     const rows = Array.from(document.querySelectorAll(".project-row"));
     const chips = Array.from(document.querySelectorAll(".chip"));
+    const tabs = Array.from(document.querySelectorAll(".tab"));
 
+    let activeTab = "application";
     let activeFilter = "all";
     let term = "";
 
     function apply() {
       let shown = 0;
+      let inTab = 0;
       rows.forEach((row) => {
         const lang = row.getAttribute("data-lang") || "";
+        const type = row.getAttribute("data-type") || "";
         const hay = (
           (row.getAttribute("data-name") || "") +
           " " +
@@ -201,17 +253,33 @@ const repoBase = "https://github.com/rakunlabs";
           " " +
           (row.getAttribute("data-category") || "") +
           " " +
-          (row.getAttribute("data-license") || "")
+          (row.getAttribute("data-license") || "") +
+          " " +
+          (row.getAttribute("data-stack") || "")
         ).toLowerCase();
+        const matchTab = type === activeTab;
+        if (matchTab) inTab++;
         const matchFilter = activeFilter === "all" || lang === activeFilter;
         const matchTerm = term === "" || hay.indexOf(term) !== -1;
-        const visible = matchFilter && matchTerm;
+        const visible = matchTab && matchFilter && matchTerm;
         row.style.display = visible ? "" : "none";
         if (visible) shown++;
       });
-      if (counter) counter.textContent = shown + " / " + rows.length;
+      if (counter) counter.textContent = shown + " / " + inTab;
       if (empty) empty.style.display = shown === 0 ? "block" : "none";
     }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", function () {
+        activeTab = tab.getAttribute("data-tab") || "application";
+        tabs.forEach((t) => {
+          const on = t === tab;
+          t.classList.toggle("is-active", on);
+          t.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        apply();
+      });
+    });
 
     if (search) {
       search.addEventListener("input", function (e) {

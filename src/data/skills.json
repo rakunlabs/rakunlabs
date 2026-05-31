@@ -1,0 +1,9 @@
+[
+  {
+    "name": "rakunlabs-go",
+    "tagline": "Build a Go service the rakunlabs way",
+    "description": "Project layout, the canonical main.go run(ctx) wiring, chu config, the ada middleware stack, and copy-paste quickstarts for each core library.",
+    "covers": ["into", "logi", "chu", "tell", "ada", "ok", "cache", "query", "muz", "bw", "alan", "tummy"],
+    "path": "skills/rakunlabs-go"
+  }
+]
