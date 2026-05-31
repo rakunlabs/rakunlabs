@@ -1,0 +1,31 @@
+---
+interface Props {
+  size?: number;
+  class?: string;
+}
+
+const { size = 34, class: cls = "" } = Astro.props;
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="-4 -4 179 178"
+  width={size}
+  height={size}
+  class:list={["brand-logo", cls]}
+  role="img"
+  aria-label="rakunlabs"
+>
+  <g stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    {/* Wings: fixed dark fold lines keep the three pastels distinct on any
+        background (a light stroke blends into the near-white cream wing). */}
+    <g stroke="#222222">
+      <path d="M22 22 L0 146 L36 119 L67 118 L55 89 Z" fill="#f5a4b8"></path>
+      <path d="M22 22 L120 64 L82.463 78.885 L67 118 Z" fill="#f5f1cf"></path>
+      <path d="M22 22 L148 0 L120 34 L120 64 Z" fill="#9fe0f2"></path>
+    </g>
+    {/* Tail is stroke-only, so it follows the theme to stay visible: light on
+        the dark background, dark (matching the wings) on the light one. */}
+    <path d="M82.463 78.885 L171 170" fill="none" stroke="currentColor"></path>
+  </g>
+</svg>

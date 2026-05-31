@@ -19,6 +19,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#16161a" />
 
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -33,11 +34,29 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:image" content="https://avatars.githubusercontent.com/u/168198600?v=4" />
 
     <link rel="canonical" href={canonicalURL} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
     <title>{title}</title>
+
+    {/* Apply persisted theme before paint to avoid a flash. */}
+    <script is:inline>
+      (function () {
+        try {
+          if (localStorage.getItem("theme") === "light") {
+            document.documentElement.classList.add("light");
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body class="min-h-screen flex flex-col bg-bg font-mono text-black antialiased">
+  <body class="min-h-screen flex flex-col bg-bg font-mono text-text antialiased">
     <Header />
     <main class="flex-1">
       <slot />

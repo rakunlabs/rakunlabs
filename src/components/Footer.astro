@@ -1,19 +1,27 @@
 ---
+import Logo from "./Logo.astro";
+
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="border-t border-black py-4 mt-auto">
-  <div class="max-w-6xl mx-auto px-[5%] flex items-center justify-between flex-wrap gap-3">
-    <div class="flex items-center gap-2 text-muted text-[13px]">
-      <span>&copy; {currentYear} rakunlabs</span>
-      <span>&middot;</span>
-      <span>Open Source Projects</span>
+<footer class="border-t border-line mt-auto">
+  <div class="flex flex-wrap items-center justify-between gap-3 px-6 sm:px-11 py-8 text-[12px] text-faint">
+    <div class="flex items-center gap-2">
+      <Logo size={18} class="opacity-85" />
+      <span>&copy; {currentYear} rakunlabs &middot; open source</span>
     </div>
 
-    <nav class="flex gap-4">
-      <a href="/privacy-policy" class="text-muted text-[13px] transition-colors duration-150 hover:text-accent hover:no-underline">Privacy Policy</a>
-      <a href="/terms-of-service" class="text-muted text-[13px] transition-colors duration-150 hover:text-accent hover:no-underline">Terms of Service</a>
-      <a href="https://github.com/rakunlabs" target="_blank" rel="noopener noreferrer" class="text-muted text-[13px] transition-colors duration-150 hover:text-accent hover:no-underline">GitHub</a>
+    <nav class="flex items-center gap-4">
+      <a href="/privacy-policy" class="text-faint hover:text-muted no-underline transition-colors duration-150">privacy</a>
+      <a href="/terms-of-service" class="text-faint hover:text-muted no-underline transition-colors duration-150">terms</a>
+      <a
+        href="https://github.com/rakunlabs"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-faint hover:text-muted no-underline transition-colors duration-150"
+      >
+        github &#8599;
+      </a>
     </nav>
   </div>
 </footer>

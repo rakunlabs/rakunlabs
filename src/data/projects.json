@@ -1,0 +1,21 @@
+[
+  { "name": "chu", "description": "config loader", "language": "Go", "category": "Config" },
+  { "name": "turna", "description": "swiss knife for services", "language": "Go", "category": "Services" },
+  { "name": "kaykay", "description": "svelte flow diagram", "language": "Svelte", "category": "UI" },
+  { "name": "ada", "description": "go web framework", "language": "Go", "category": "Web" },
+  { "name": "query", "description": "query parser statements", "language": "Go", "category": "Data" },
+  { "name": "pika", "description": "config server", "language": "Svelte", "category": "Config" },
+  { "name": "ok", "description": "http client", "language": "Go", "category": "Web" },
+  { "name": "at", "description": "ai gateway", "language": "Go", "category": "AI" },
+  { "name": "grex", "description": "code search server for llm", "language": "Go", "category": "AI" },
+  { "name": "alan", "description": "distributed communication", "language": "Go", "category": "Infra" },
+  { "name": "muz", "description": "db migration library", "language": "Go", "category": "Data" },
+  { "name": "into", "description": "main initializer", "language": "Go", "category": "Infra" },
+  { "name": "logi", "description": "log adapter", "language": "Go", "category": "Infra" },
+  { "name": "cache", "description": "generic set/get cache", "language": "Go", "category": "Data" },
+  { "name": "mapx", "description": "map merge and compare", "language": "Go", "category": "Data" },
+  { "name": "tummy", "description": "tummy time scheduler", "language": "Go", "category": "Misc" },
+  { "name": "contextx", "description": "context key/value store", "language": "Go", "category": "Data" },
+  { "name": "ntx", "description": "network context", "language": "Go", "category": "Infra" },
+  { "name": "rakunlabs", "description": "main website", "language": "Astro", "category": "Meta" }
+]

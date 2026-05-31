@@ -1,68 +1,233 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import ProjectCard from "../components/ProjectCard.astro";
+import projectsData from "../data/projects.json";
 
-interface Repo {
+interface Project {
   name: string;
-  description: string | null;
-  html_url: string;
-  stargazers_count: number;
-  language: string | null;
-  forks_count: number;
-  fork: boolean;
-  archived: boolean;
-  topics: string[];
+  description: string;
+  language: string;
+  category: string;
+  license?: string; // optional manual override; otherwise detected from GitHub
 }
 
-let repos: Repo[] = [];
+// Curated directory. Add new repos in src/data/projects.json — stars and the
+// license are detected from GitHub at build time.
+const projects = projectsData as Project[];
 
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+// Best-effort enrichment from the GitHub org: star count + detected license.
+// Never blocks the page; offline builds simply skip stars/licenses.
+const gh: Record<string, { stars: number; license: string }> = {};
 try {
-  const response = await fetch(
-    "https://api.github.com/orgs/rakunlabs/repos?per_page=100&sort=updated&direction=desc",
-    {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        "User-Agent": "rakunlabs-website",
-      },
-    }
+  const res = await fetch(
+    "https://api.github.com/orgs/rakunlabs/repos?per_page=100",
+    { headers: { Accept: "application/vnd.github.v3+json", "User-Agent": "rakunlabs-website" } }
   );
-
-  if (response.ok) {
-    const data: Repo[] = await response.json();
-    repos = data
-      .filter((repo) => !repo.fork && !repo.archived)
-      .sort((a, b) => b.stargazers_count - a.stargazers_count);
+  if (res.ok) {
+    const data: Array<{
+      name: string;
+      stargazers_count: number;
+      license: { spdx_id: string | null } | null;
+    }> = await res.json();
+    for (const r of data) {
+      const spdx = r.license?.spdx_id;
+      gh[r.name.toLowerCase()] = {
+        stars: r.stargazers_count ?? 0,
+        license: spdx && spdx !== "NOASSERTION" ? spdx : "",
+      };
+    }
   }
-} catch (error) {
-  console.error("Failed to fetch repos:", error);
+} catch (e) {
+  // offline build — gh stays empty
 }
+
+function info(p: Project) {
+  const g = gh[p.name.toLowerCase()] ?? { stars: 0, license: "" };
+  return { stars: g.stars, license: p.license || g.license };
+}
+
+const total = projects.length;
+const languages = [...new Set(projects.map((p) => p.language))]; // first-appearance order
+const langCount = languages.length;
+
+// License summary derived from the actual repos rather than hard-coded.
+const licenseSet = [...new Set(projects.map((p) => info(p).license).filter(Boolean))].sort();
+let licenseValue = "";
+let licenseSuffix = "open source";
+if (licenseSet.length >= 1 && licenseSet.length <= 3) {
+  licenseValue = licenseSet.join(" + ");
+  licenseSuffix = "licensed";
+} else if (licenseSet.length > 3) {
+  licenseValue = String(licenseSet.length);
+  licenseSuffix = "licenses";
+}
+
+const repoBase = "https://github.com/rakunlabs";
 ---
 
-<Layout title="rakunlabs - Open Source Projects" description="Explore open source projects by rakunlabs. Building tools and libraries for the developer community.">
-  <div class="max-w-6xl mx-auto px-[5%]">
-    <section class="text-center py-8 pb-6">
-      <h1 class="inline-block text-2xl font-bold px-3 py-1 bg-accent text-white border-y border-black">Projects</h1>
-      <p class="text-muted text-sm max-w-xl mx-auto mt-3">Open source tools and libraries built by rakunlabs</p>
-    </section>
+<Layout
+  title="rakunlabs — terminal index"
+  description="Small, sharp open-source Go & Svelte tools from rakunlabs — config, services, data and AI primitives."
+>
+  {/* ---------------------------------------------------------------- HERO */}
+  <section class="px-6 sm:px-11 pt-[54px] pb-8">
+    <p class="text-[13px] text-faint mb-5 font-medium">
+      <span class="text-cream">~/rakunlabs</span>
+      <span class="text-blue">$</span> code ./projects --open-source
+    </p>
 
-    {repos.length > 0 ? (
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-12">
-        {repos.map((repo) => (
-          <ProjectCard
-            name={repo.name}
-            description={repo.description}
-            url={repo.html_url}
-            stars={repo.stargazers_count}
-            language={repo.language}
-            forks={repo.forks_count}
-            topics={repo.topics || []}
-          />
-        ))}
-      </div>
-    ) : (
-      <p class="text-center text-muted py-16">
-        Unable to load repositories. Visit our <a href="https://github.com/rakunlabs" class="text-accent hover:text-accent-dark">GitHub</a> directly.
-      </p>
-    )}
-  </div>
+    <h1 class="font-bold text-[clamp(2rem,6.5vw,46px)] leading-[1.08] tracking-[-0.02em] max-w-[760px] text-text">
+      Small, sharp tools<br />for people who <span class="text-pink">develop</span>.
+    </h1>
+
+    <p class="text-muted text-[15px] max-w-[540px] mt-5 leading-relaxed">
+      Open-source Go &amp; Svelte libraries from rakunlabs — config, services,
+      data and AI primitives.
+    </p>
+
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted mt-7">
+      <span><span class="text-text font-bold tabular-nums">{total}</span> repositories</span>
+      <span class="text-faint">&middot;</span>
+      <span><span class="text-text font-bold tabular-nums">{langCount}</span> languages</span>
+      <span class="text-faint">&middot;</span>
+      {
+        licenseValue ? (
+          <span><span class="text-text font-bold">{licenseValue}</span> {licenseSuffix}</span>
+        ) : (
+          <span>{licenseSuffix}</span>
+        )
+      }
+    </div>
+  </section>
+
+  {/* --------------------------------------------------- SEARCH + FILTERS */}
+  <section class="px-6 sm:px-11 pb-5">
+    <div class="flex items-center gap-3 bg-surface border border-line rounded-lg px-4 py-3">
+      <span class="text-pink font-bold select-none">&gt;</span>
+      <input
+        id="search"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Filter projects"
+        placeholder="filter projects by name, tag, language or license…"
+        class="flex-1 min-w-0 bg-transparent outline-none border-0 text-text placeholder:text-faint text-[14px]"
+      />
+      <span id="counter" class="text-faint text-[13px] tabular-nums shrink-0">{total} / {total}</span>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mt-3">
+      <button type="button" class="chip is-active" data-filter="all">all</button>
+      {
+        languages.map((lang) => (
+          <button type="button" class="chip" data-filter={slugify(lang)}>
+            {lang.toLowerCase()}
+          </button>
+        ))
+      }
+    </div>
+  </section>
+
+  {/* ----------------------------------------------------- PROJECT LIST */}
+  <section class="px-6 sm:px-11 pb-16">
+    <div class="border-t border-line">
+      {
+        projects.map((p, i) => {
+          const slug = slugify(p.language);
+          const { stars, license } = info(p);
+          return (
+            <a
+              href={`${repoBase}/${p.name}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="project-row"
+              style={`--row-color: var(--lang-${slug}, var(--color-muted))`}
+              data-name={p.name}
+              data-desc={p.description}
+              data-category={p.category}
+              data-lang={slug}
+              data-license={license}
+            >
+              <span class="col-index text-faint text-[13px] tabular-nums">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span class="col-name font-bold text-[15px] truncate" style="color: var(--row-color)">
+                {p.name}
+              </span>
+              <span class="col-desc text-muted text-[14px] truncate">{p.description}</span>
+              <span class="col-cat justify-self-start text-faint text-[12px] border border-line rounded-[20px] px-2.5 py-[3px] leading-none">
+                {p.category}
+              </span>
+              <span class="col-meta flex items-center gap-3 justify-self-end text-muted text-[13px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="inline-block w-[9px] h-[9px] rounded-full" style="background: var(--row-color)" />
+                  {p.language}
+                </span>
+                {license && <span class="col-lic text-faint">{license}</span>}
+                {stars > 0 && <span class="text-faint tabular-nums">&#9733; {stars}</span>}
+              </span>
+            </a>
+          );
+        })
+      }
+    </div>
+
+    <div id="empty" class="text-muted text-[14px] py-12 text-center" style="display:none">
+      no projects match — try a different term or filter.
+    </div>
+  </section>
 </Layout>
+
+<script is:inline>
+  (function () {
+    const search = document.getElementById("search");
+    const counter = document.getElementById("counter");
+    const empty = document.getElementById("empty");
+    const rows = Array.from(document.querySelectorAll(".project-row"));
+    const chips = Array.from(document.querySelectorAll(".chip"));
+
+    let activeFilter = "all";
+    let term = "";
+
+    function apply() {
+      let shown = 0;
+      rows.forEach((row) => {
+        const lang = row.getAttribute("data-lang") || "";
+        const hay = (
+          (row.getAttribute("data-name") || "") +
+          " " +
+          (row.getAttribute("data-desc") || "") +
+          " " +
+          (row.getAttribute("data-category") || "") +
+          " " +
+          (row.getAttribute("data-license") || "")
+        ).toLowerCase();
+        const matchFilter = activeFilter === "all" || lang === activeFilter;
+        const matchTerm = term === "" || hay.indexOf(term) !== -1;
+        const visible = matchFilter && matchTerm;
+        row.style.display = visible ? "" : "none";
+        if (visible) shown++;
+      });
+      if (counter) counter.textContent = shown + " / " + rows.length;
+      if (empty) empty.style.display = shown === 0 ? "block" : "none";
+    }
+
+    if (search) {
+      search.addEventListener("input", function (e) {
+        term = String(e.target.value || "").trim().toLowerCase();
+        apply();
+      });
+    }
+
+    chips.forEach((chip) => {
+      chip.addEventListener("click", function () {
+        activeFilter = chip.getAttribute("data-filter") || "all";
+        chips.forEach((c) => c.classList.toggle("is-active", c === chip));
+        apply();
+      });
+    });
+
+    apply();
+  })();
+</script>

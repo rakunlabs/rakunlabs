@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 179 178" width="171" height="170" role="img" aria-label="rakunlabs">
+  <g stroke="#222222" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Tail line: starts exactly at the shared folded tip so there is no offset -->
+    <path d="M82.463 78.885 L171 170" fill="none"/>
+
+    <!-- Left / pink wing -->
+    <path d="M22 22 L0 146 L36 119 L67 118 L55 89 Z" fill="#f5a4b8"/>
+
+    <!-- Center / cream fold: shares exact coordinates with neighboring shapes -->
+    <path d="M22 22 L120 64 L82.463 78.885 L67 118 Z" fill="#f5f1cf"/>
+
+    <!-- Top / blue wing -->
+    <path d="M22 22 L148 0 L120 34 L120 64 Z" fill="#9fe0f2"/>
+  </g>
+</svg>
