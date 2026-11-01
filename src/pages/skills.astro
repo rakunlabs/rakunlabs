@@ -19,7 +19,7 @@ const repoUrl = "https://github.com/rakunlabs/rakunlabs";
 const primary = skills[0];
 const installs = [
   { id: "claude", label: "Claude Code", dir: "~/.claude/skills" },
-  { id: "opencode", label: "opencode", dir: "~/.config/opencode/skill" },
+  { id: "opencode", label: "opencode", dir: "~/.config/opencode/skills" },
   { id: "agents", label: "~/.agents", dir: "~/.agents/skills" },
 ];
 
@@ -27,7 +27,8 @@ const manual = `git clone ${repoUrl}
 cp -r rakunlabs/${primary.path} ~/.claude/skills/`;
 
 const usage = `scaffold a new rakunlabs Go service called "billing" with
-chu config, tell telemetry and an ada HTTP server`;
+chu config, tell telemetry, postgres + muz migrations, an ada HTTP
+server with an embedded Svelte UI, and a nightly hardloop cron job`;
 ---
 
 <Layout

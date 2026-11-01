@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: 'https://rakunlabs.io',
   output: 'static',
+  compressHTML: true,
   vite: {
     plugins: [tailwindcss()],
   },

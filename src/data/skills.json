@@ -2,8 +2,8 @@
   {
     "name": "rakunlabs-go",
     "tagline": "Build a Go service the rakunlabs way",
-    "description": "Project layout, the canonical main.go run(ctx) wiring, chu config, the ada middleware stack, and copy-paste quickstarts for each core library.",
-    "covers": ["into", "logi", "chu", "tell", "ada", "ok", "cache", "query", "muz", "bw", "alan", "tummy"],
+    "description": "Project layout with an embedded Svelte UI, the canonical main.go run(ctx) wiring, chu config, ada middleware and context handlers, plus copy-paste quickstarts for every core library, checked against the latest releases.",
+    "covers": ["into", "logi", "chu", "gofret", "tell", "ada", "ok", "cache", "query", "muz", "types", "bw", "alan", "hardloop", "tummy"],
     "path": "skills/rakunlabs-go"
   }
 ]

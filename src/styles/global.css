@@ -39,6 +39,7 @@
   --lang-go: #a8d8f0; /* blue */
   --lang-svelte: #f0a8c0; /* pink */
   --lang-astro: #f0f0c0; /* cream */
+  --lang-shell: #b8e0b0; /* green */
   --lang-default: #928e98; /* fallback for any new language */
   color-scheme: dark;
 }
@@ -73,6 +74,7 @@ html.light {
   --lang-go: #2f6f9c;
   --lang-svelte: #bf4a7d;
   --lang-astro: #8a7a1d;
+  --lang-shell: #3f7a35;
   --lang-default: #6f6a5f;
 
   color-scheme: light;
@@ -217,6 +219,9 @@ html.light .chip.is-active {
 }
 .chip.is-active[data-filter="astro"] {
   background: var(--lang-astro);
+}
+.chip.is-active[data-filter="shell"] {
+  background: var(--lang-shell);
 }
 
 /* Underline tabs (application / library) */
