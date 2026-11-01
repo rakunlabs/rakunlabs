@@ -23,6 +23,9 @@ const installs = [
   { id: "agents", label: "~/.agents", dir: "~/.agents/skills" },
 ];
 
+const cli = `npx skills add ${repo} --skill ${primary.name} -g`;
+const cliPnpm = `pnpx skills add ${repo} --skill ${primary.name} -g`;
+
 const manual = `git clone ${repoUrl}
 cp -r rakunlabs/${primary.path} ~/.claude/skills/`;
 
@@ -89,8 +92,20 @@ server with an embedded Svelte UI, and a nightly hardloop cron job`;
   <section class="px-6 sm:px-11 pb-10">
     <h2 class="text-[13px] text-faint uppercase tracking-wider mb-1">install</h2>
     <p class="text-muted text-[14px] mb-4 max-w-[560px]">
-      One command — pick your agent. <span class="text-text">degit</span> copies just the
-      skill folder (no git history) into the directory your agent watches.
+      The <a href="https://github.com/vercel-labs/skills" target="_blank" rel="noopener noreferrer" class="text-text">skills</a>
+      CLI detects your agents (Claude Code, opencode, Codex, Cursor, …) and installs the
+      skill for each of them. Drop <span class="text-text">-g</span> to install into the
+      current project only; update later with <span class="text-text">npx skills update</span>.
+    </p>
+
+    <div class="flex flex-col gap-3">
+      <CodeBlock label="npx" code={cli} />
+      <CodeBlock label="pnpm" code={cliPnpm} />
+    </div>
+
+    <p class="text-muted text-[14px] mt-6 mb-4 max-w-[560px]">
+      Or copy it straight into one agent's directory. <span class="text-text">degit</span>
+      copies just the skill folder (no git history).
     </p>
 
     <div class="tabs" role="tablist" aria-label="Agent">

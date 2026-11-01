@@ -16,17 +16,36 @@ into the directory your agent watches.
 
 ## Install
 
+### With the `skills` CLI (recommended)
+
+The [`skills`](https://github.com/vercel-labs/skills) CLI detects the coding
+agents you have (Claude Code, opencode, Codex, Cursor, …) and installs the
+skill for each of them:
+
+```sh
+npx skills add rakunlabs/rakunlabs --skill rakunlabs-go -g
+# or
+pnpx skills add rakunlabs/rakunlabs --skill rakunlabs-go -g
+```
+
+- Drop `-g` to install into the current project instead of your home directory.
+- Pick agents explicitly with `-a`, e.g. `-a claude-code -a opencode`.
+- List what this repo offers with `npx skills add rakunlabs/rakunlabs --list`.
+- Update later with `npx skills update`.
+
+### Manual copy
+
 Pick the folder that matches your agent and copy the skill into it. Examples
 for `rakunlabs-go` (replace with any skill name):
 
-### Claude Code
+#### Claude Code
 
 ```sh
 mkdir -p ~/.claude/skills
 cp -r rakunlabs-go ~/.claude/skills/
 ```
 
-### opencode
+#### opencode
 
 Global (available in every project):
 
@@ -51,7 +70,7 @@ Or leave it where it is and point opencode at this folder in `opencode.json`:
 }
 ```
 
-### Other agents (`~/.agents`)
+#### Other agents (`~/.agents`)
 
 ```sh
 mkdir -p ~/.agents/skills
