@@ -12,7 +12,7 @@ into the directory your agent watches.
 
 | Skill | What it does |
 | --- | --- |
-| [`rakunlabs-go`](./rakunlabs-go/) | Build a Go service the rakunlabs way: project layout with an embedded UI, `main.go` wiring, and quickstarts for `into`, `logi`, `chu`, `gofret`, `tell`, `ada`, `ok`, `cache`, `query`, `muz`, `types`, `bw`, `alan`, `hardloop`, `tummy`. |
+| [`rakunlabs-go`](./rakunlabs-go/) | Build a Go service the rakunlabs way: project layout with an embedded UI, `main.go` wiring, quickstarts for `into`, `logi`, `chu`, `gofret`, `tell`, `ada`, `ok`, `cache`, `query`, `muz`, `types`, `bw`, `alan`, `hardloop`, `tummy`, and the **ada Auth Kit** (login, users, roles, admin page, MCP OAuth). |
 
 ## Install
 
@@ -84,6 +84,11 @@ agent loads a skill on demand when your request matches the skill's
 `description`, so just ask it to build or wire a rakunlabs Go service.
 
 ## Authoring notes
+
+- Keep `SKILL.md` an index: frontmatter, when to use, a table of
+  `references/*.md`, and the short conventions. Put each topic in its own
+  reference file so the agent loads only what the task needs. Link files
+  relatively (`references/x.md`; inside `references/`, `x.md`).
 
 - Folder name must equal the `name:` in the skill's frontmatter, lowercase and
   hyphen-separated.
